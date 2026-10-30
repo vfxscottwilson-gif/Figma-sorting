@@ -2,8 +2,8 @@ name: Organize my sheet
 
 on:
   schedule:
-    - cron: "0 2 * * *"          # Every day 02:00 UTC = 07:00 PKT
-  workflow_dispatch:              # Manual "Run workflow" trigger
+    - cron: "0 2 * * *"
+  workflow_dispatch:
     inputs:
       dry_run:
         description: "yes = test only, writes nothing"
@@ -35,18 +35,14 @@ jobs:
       - name: Run organizer script
         run: python organizer.py
         env:
-          # REQUIRED
           SHEET_ID: ${{ secrets.SHEET_ID }}
           GOOGLE_SA: ${{ secrets.GOOGLE_SA }}
-          # AI KEYS
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-          # OPTIONAL: Figma
           FIGMA_TOKEN: ${{ secrets.FIGMA_TOKEN }}
           FIGMA_FILE: ${{ vars.FIGMA_FILE }}
           FIGMA_COMMENT: ${{ vars.FIGMA_COMMENT }}
-          # OPTIONAL: settings
           INBOX_TAB: ${{ vars.INBOX_TAB }}
           TIMEZONE: ${{ vars.TIMEZONE }}
           RUN_LIMIT: ${{ vars.RUN_LIMIT }}
