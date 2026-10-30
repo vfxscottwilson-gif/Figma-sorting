@@ -2,15 +2,15 @@ name: Organize my sheet
 
 on:
   schedule:
-    - cron: "0 2 * * *"          # every day 02:00 UTC = 07:00 Pakistan time (GitHub may start it a few minutes late)
-  workflow_dispatch:              # the "Run workflow" button
+    - cron: "0 2 * * *"          # Every day 02:00 UTC = 07:00 PKT
+  workflow_dispatch:              # Manual "Run workflow" trigger
     inputs:
       dry_run:
         description: "yes = test only, writes nothing"
         default: "no"
 
 concurrency:
-  group: organizer                # two runs can never overlap and write twice
+  group: organizer
   cancel-in-progress: false
 
 permissions:
@@ -21,27 +21,33 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: pip
-      - run: pip install -r requirements.txt
-      - run: python organizer.py
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run organizer script
+        run: python organizer.py
         env:
           # REQUIRED
           SHEET_ID: ${{ secrets.SHEET_ID }}
           GOOGLE_SA: ${{ secrets.GOOGLE_SA }}
-          # AI KEYS: add at least one. Several keys per provider can be comma separated.
+          # AI KEYS
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           # OPTIONAL: Figma
           FIGMA_TOKEN: ${{ secrets.FIGMA_TOKEN }}
-          FIGMA_FILE: ${{ vars.FIGMA_FILE }}          # the board link or its file key
-          FIGMA_COMMENT: ${{ vars.FIGMA_COMMENT }}    # yes = post a short "sorted N items" comment with the sheet link
-          # OPTIONAL: settings (all have safe defaults)
-          INBOX_TAB: ${{ vars.INBOX_TAB }}            # name of the tab where you paste (default: Inbox, else first tab)
-          TIMEZONE: ${{ vars.TIMEZONE }}              # default Asia/Karachi
-          RUN_LIMIT: ${{ vars.RUN_LIMIT }}            # items per run, default 150
+          FIGMA_FILE: ${{ vars.FIGMA_FILE }}
+          FIGMA_COMMENT: ${{ vars.FIGMA_COMMENT }}
+          # OPTIONAL: settings
+          INBOX_TAB: ${{ vars.INBOX_TAB }}
+          TIMEZONE: ${{ vars.TIMEZONE }}
+          RUN_LIMIT: ${{ vars.RUN_LIMIT }}
           DRY_RUN: ${{ github.event.inputs.dry_run || vars.DRY_RUN }}
